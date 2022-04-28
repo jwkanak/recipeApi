@@ -1,0 +1,48 @@
+service: recipe-api
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+
+iamRoleStatements:
+  - Effect: Allow
+    Action:
+      - dynamodb:Query
+      - dynamodb:Scan
+      - dynamodb:GetItem
+      - dynamodb:PutItem
+      - dynamodb:DeleteItem
+    Resource: '*'
+
+custom:
+  RecipeTable: recipe-tablel
+
+resources:
+  Resources:
+    SpacesDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: "id"
+            AttributeType: "S"
+        KeySchema:
+          -
+            AttributeName: "id"
+            KeyType: "HASH"
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:custom.RecipeTable}
+
+functions:
+  createRecipe:
+    handler: handler.createRecipe
+    events:
+      - http:
+          path: recipe
+          method: post
+          cors: 
+            origins: '*'
